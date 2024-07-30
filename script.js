@@ -3,9 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const alarmTimeInput = document.getElementById('alarm-time');
     const setAlarmButton = document.getElementById('set-alarm');
     const alarmStatusElement = document.getElementById('alarm-status');
+    const alarmListElement = document.getElementById('alarm-list');
 
-    let alarmTime = null;
-    let alarmTimeout = null;
+    let alarms = [];
 
     function updateCurrentTime() {
         const now = new Date();
@@ -14,10 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function checkAlarm() {
         const now = new Date();
-        if (alarmTime && now >= alarmTime) {
-            alert("Alarm Ringing!");
-            clearAlarm();
-        }
+        alarms.forEach(alarm => {
+            if (now >= alarm.time) {
+                alert("Alarm Ringing!");
+                clearAlarm(alarm.id);
+            }
+        });
     }
 
     function setAlarm() {
@@ -28,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const [hours, minutes] = alarmValue.split(':');
-        alarmTime = new Date();
+        const alarmTime = new Date();
         alarmTime.setHours(hours);
         alarmTime.setMinutes(minutes);
         alarmTime.setSeconds(0);
@@ -36,31 +38,37 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = new Date();
         if (alarmTime <= now) {
             alert("The set time has already passed. Please choose a future time.");
-            alarmTime = null;
             return;
         }
 
-        alarmStatusElement.textContent = `Alarm set for ${alarmTime.toLocaleTimeString()}`;
-
-        if (alarmTimeout) {
-            clearTimeout(alarmTimeout);
-        }
-
-        alarmTimeout = setTimeout(() => {
-            alert("Alarm Ringing!");
-            clearAlarm();
-        }, alarmTime - now);
+        const alarmId = Date.now();
+        alarms.push({ id: alarmId, time: alarmTime });
+        updateAlarmList();
     }
 
-    function clearAlarm() {
-        alarmTime = null;
-        alarmStatusElement.textContent = "";
-        if (alarmTimeout) {
-            clearTimeout(alarmTimeout);
-        }
+    function clearAlarm(id) {
+        alarms = alarms.filter(alarm => alarm.id !== id);
+        updateAlarmList();
+    }
+
+    function updateAlarmList() {
+        alarmListElement.innerHTML = '';
+        alarms.forEach(alarm => {
+            const alarmItem = document.createElement('div');
+            alarmItem.className = 'alarm-item';
+            alarmItem.innerHTML = `
+                <span>${alarm.time.toLocaleTimeString()}</span>
+                <button class="btn btn-danger" onclick="clearAlarm(${alarm.id})">Delete</button>
+            `;
+            alarmListElement.appendChild(alarmItem);
+        });
+
+        alarmStatusElement.textContent = alarms.length ? 'Alarms Set' : '';
     }
 
     setAlarmButton.addEventListener('click', setAlarm);
     setInterval(updateCurrentTime, 1000);
     setInterval(checkAlarm, 1000);
+
+    window.clearAlarm = clearAlarm;
 });
