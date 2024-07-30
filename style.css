@@ -1,4 +1,3 @@
-
 body {
   display: flex;
   justify-content: center;
@@ -12,4 +11,16 @@ body {
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.alarm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+.alarm-item button {
+  margin-left: 10px;
 }
